@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         // Define environment variables
-        MAVEN_HOME = tool name: 'Maven 4.0.0', type: 'maven'
+        MAVEN_HOME = tool name: 'Maven 3.8.4', type: 'maven'
         EMAIL_RECIPIENT = 's223770775@deakin.edu.au'
     }
 
