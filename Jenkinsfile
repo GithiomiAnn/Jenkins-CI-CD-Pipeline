@@ -11,44 +11,49 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building the code using Maven...'
-                sh "mvn clean package"
+                bat "${MAVEN_HOME}/bin/mvn clean package"
             }
         }
 
         stage('Unit and Integration Tests') {
             steps {
                 echo 'Running unit and integration tests using JUnit and Selenium...'
-                sh "mvn test"
+                bat "${MAVEN_HOME}/bin/mvn test"
             }
         }
 
         stage('Code Analysis') {
             steps {
                 echo 'Performing code analysis using SonarQube...'
+                // Add your SonarQube analysis command here
             }
         }
 
         stage('Security Scan') {
             steps {
                 echo 'Performing security scan using OWASP Dependency-Check...'
+                // Add your OWASP Dependency-Check command here
             }
         }
 
         stage('Deploy to Staging') {
             steps {
                 echo 'Deploying to the staging server on AWS EC2...'
+                // Add your deployment command here
             }
         }
 
         stage('Integration Tests on Staging') {
             steps {
                 echo 'Running integration tests on the staging environment...'
+                // Add your integration tests command here
             }
         }
 
         stage('Deploy to Production') {
             steps {
                 echo 'Deploying to the production server on AWS EC2...'
+                // Add your production deployment command here
             }
         }
     }
