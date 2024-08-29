@@ -75,4 +75,14 @@ pipeline {
                 subject: "Jenkins Pipeline Failure: ${currentBuild.fullDisplayName}",
                 body: "The Jenkins pipeline has failed.\n\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}\nCheck the attached logs for more details.",
                 attachLog: true
-           
+            )
+        }
+        always {
+            script {
+                if (currentBuild.result == 'FAILURE' || currentBuild.result == 'SUCCESS') {
+                    echo "Sending notification email to ${EMAIL_RECIPIENT}."
+                }
+            }
+        }
+    }
+}
