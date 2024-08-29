@@ -11,14 +11,14 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building the code using Maven...'
-                bat "${MAVEN_HOME}/bin/mvn clean package"
+                bat "\"${MAVEN_HOME}/bin/mvn\" clean package"
             }
         }
 
         stage('Unit and Integration Tests') {
             steps {
                 echo 'Running unit and integration tests using JUnit and Selenium...'
-                bat "${MAVEN_HOME}/bin/mvn test"
+                bat "\"${MAVEN_HOME}/bin/mvn\" test"
             }
         }
 
