@@ -3,7 +3,9 @@ pipeline {
 
     environment {
         // Environment variables
-        MAVEN_HOME = tool name: 'Maven 3.9.9', type: 'maven'
+        MAVEN_HOME = 'C:\\Program Files\\apache-maven-3.9.9'
+        JAVA_HOME = 'C:\\Program Files\\jdk-22.0.2'
+        PATH = "${JAVA_HOME}\\bin;${MAVEN_HOME}\\bin;${env.PATH}"
         EMAIL_RECIPIENT = 's223770775@deakin.edu.au'
     }
 
@@ -11,14 +13,14 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building the code using Maven...'
-                bat "\"${MAVEN_HOME}/bin/mvn\" clean package"
+                bat 'mvn clean package'
             }
         }
 
         stage('Unit and Integration Tests') {
             steps {
                 echo 'Running unit and integration tests using JUnit and Selenium...'
-                bat "\"${MAVEN_HOME}/bin/mvn\" test"
+                bat 'mvn test'
             }
         }
 
@@ -73,14 +75,4 @@ pipeline {
                 subject: "Jenkins Pipeline Failure: ${currentBuild.fullDisplayName}",
                 body: "The Jenkins pipeline has failed.\n\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}\nCheck the attached logs for more details.",
                 attachLog: true
-            )
-        }
-        always {
-            script {
-                if (currentBuild.result == 'FAILURE' || currentBuild.result == 'SUCCESS') {
-                    echo "Sending notification email to ${EMAIL_RECIPIENT}."
-                }
-            }
-        }
-    }
-}
+           
