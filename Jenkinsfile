@@ -4,7 +4,6 @@ pipeline {
     environment {
         // Environment variables
         MAVEN_HOME = tool name: 'Maven 3.9.9', type: 'maven'
-        PATH = "${MAVEN_HOME}/bin:${env.PATH}"
         EMAIL_RECIPIENT = 's223770775@deakin.edu.au'
     }
 
@@ -12,14 +11,14 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building the code using Maven...'
-                sh "${MAVEN_HOME}/bin/mvn clean package"
+                sh "mvn clean package"
             }
         }
 
         stage('Unit and Integration Tests') {
             steps {
                 echo 'Running unit and integration tests using JUnit and Selenium...'
-                sh "${MAVEN_HOME}/bin/mvn test"
+                sh "mvn test"
             }
         }
 
