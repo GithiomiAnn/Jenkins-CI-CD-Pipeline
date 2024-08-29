@@ -27,35 +27,30 @@ pipeline {
         stage('Code Analysis') {
             steps {
                 echo 'Performing code analysis using SonarQube...'
-                // Add your SonarQube analysis command here
             }
         }
 
         stage('Security Scan') {
             steps {
                 echo 'Performing security scan using OWASP Dependency-Check...'
-                // Add your OWASP Dependency-Check command here
             }
         }
 
         stage('Deploy to Staging') {
             steps {
                 echo 'Deploying to the staging server on AWS EC2...'
-                // Add your deployment command here
             }
         }
 
         stage('Integration Tests on Staging') {
             steps {
                 echo 'Running integration tests on the staging environment...'
-                // Add your integration tests command here
             }
         }
 
         stage('Deploy to Production') {
             steps {
                 echo 'Deploying to the production server on AWS EC2...'
-                // Add your production deployment command here
             }
         }
     }
