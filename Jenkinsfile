@@ -2,8 +2,9 @@ pipeline {
     agent any
 
     environment {
-        // Define environment variables
-        MAVEN_HOME = tool name: 'Maven 3.8.4', type: 'maven'
+        // Environment variables
+        MAVEN_HOME = tool name: 'Maven 3.9.9', type: 'maven'
+        PATH = "${MAVEN_HOME}/bin:${env.PATH}"
         EMAIL_RECIPIENT = 's223770775@deakin.edu.au'
     }
 
@@ -11,14 +12,14 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building the code using Maven...'
-                sh "mvn clean package"
+                sh "${MAVEN_HOME}/bin/mvn clean package"
             }
         }
 
         stage('Unit and Integration Tests') {
             steps {
                 echo 'Running unit and integration tests using JUnit and Selenium...'
-                sh "mvn test"
+                sh "${MAVEN_HOME}/bin/mvn test"
             }
         }
 
@@ -36,7 +37,8 @@ pipeline {
 
         stage('Deploy to Staging') {
             steps {
-                echo 'Deploying to the staging server on AWS EC2...'            }
+                echo 'Deploying to the staging server on AWS EC2...'
+            }
         }
 
         stage('Integration Tests on Staging') {
