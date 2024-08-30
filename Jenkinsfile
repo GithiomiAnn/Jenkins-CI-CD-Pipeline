@@ -6,7 +6,7 @@ pipeline {
         MAVEN_HOME = 'C:\\Program Files\\apache-maven-3.9.9'
         JAVA_HOME = 'C:\\Program Files\\jdk-22.0.2'
         PATH = "${JAVA_HOME}\\bin;${MAVEN_HOME}\\bin;${env.PATH}"
-        EMAIL_RECIPIENT = 's223770775@deakin.edu.au'
+        EMAIL_RECIPIENT = 'annegithiomi1@gmail.com'
     }
 
     stages {
