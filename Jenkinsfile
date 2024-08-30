@@ -22,6 +22,22 @@ pipeline {
                 echo 'Running unit and integration tests using JUnit and Selenium...'
                 bat 'mvn test'
             }
+            post {
+                success {
+                    mail(
+                        to: "${EMAIL_RECIPIENT}",
+                        subject: "Jenkins Pipeline Success: Unit and Integration Tests - ${currentBuild.fullDisplayName}",
+                        body: "The Unit and Integration Tests stage has completed successfully.\n\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}"
+                    )
+                }
+                failure {
+                    mail(
+                        to: "${EMAIL_RECIPIENT}",
+                        subject: "Jenkins Pipeline Failure: Unit and Integration Tests - ${currentBuild.fullDisplayName}",
+                        body: "The Unit and Integration Tests stage has failed.\n\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}\nCheck the logs for more details."
+                    )
+                }
+            }
         }
 
         stage('Code Analysis') {
@@ -33,6 +49,22 @@ pipeline {
         stage('Security Scan') {
             steps {
                 echo 'Performing security scan using OWASP Dependency-Check...'
+            }
+            post {
+                success {
+                    mail(
+                        to: "${EMAIL_RECIPIENT}",
+                        subject: "Jenkins Pipeline Success: Security Scan - ${currentBuild.fullDisplayName}",
+                        body: "The Security Scan stage has completed successfully.\n\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}"
+                    )
+                }
+                failure {
+                    mail(
+                        to: "${EMAIL_RECIPIENT}",
+                        subject: "Jenkins Pipeline Failure: Security Scan - ${currentBuild.fullDisplayName}",
+                        body: "The Security Scan stage has failed.\n\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}\nCheck the logs for more details."
+                    )
+                }
             }
         }
 
