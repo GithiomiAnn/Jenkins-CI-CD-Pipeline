@@ -2,6 +2,7 @@ pipeline {
     agent any
 
     environment {
+        // Environment variables
         MAVEN_HOME = 'C:\\Program Files\\apache-maven-3.9.9'
         JAVA_HOME = 'C:\\Program Files\\jdk-22.0.2'
         PATH = "${JAVA_HOME}\\bin;${MAVEN_HOME}\\bin;${env.PATH}"
@@ -12,14 +13,30 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building the code using Maven...'
-                bat 'mvn clean package > build.log'  // Redirect output to build.log
+                bat 'mvn clean package'
             }
         }
 
         stage('Unit and Integration Tests') {
             steps {
                 echo 'Running unit and integration tests using JUnit and Selenium...'
-                bat 'mvn test >> build.log'  // Append output to build.log
+                bat 'mvn test'
+            }
+            post {
+                success {
+                    mail(
+                        to: "${EMAIL_RECIPIENT}",
+                        subject: "Jenkins Pipeline Success: Unit and Integration Tests - ${currentBuild.fullDisplayName}",
+                        body: "The Unit and Integration Tests stage has completed successfully.\n\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}"
+                    )
+                }
+                failure {
+                    mail(
+                        to: "${EMAIL_RECIPIENT}",
+                        subject: "Jenkins Pipeline Failure: Unit and Integration Tests - ${currentBuild.fullDisplayName}",
+                        body: "The Unit and Integration Tests stage has failed.\n\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}\nCheck the logs for more details."
+                    )
+                }
             }
         }
 
@@ -32,6 +49,22 @@ pipeline {
         stage('Security Scan') {
             steps {
                 echo 'Performing security scan using OWASP Dependency-Check...'
+            }
+            post {
+                success {
+                    mail(
+                        to: "${EMAIL_RECIPIENT}",
+                        subject: "Jenkins Pipeline Success: Security Scan - ${currentBuild.fullDisplayName}",
+                        body: "The Security Scan stage has completed successfully.\n\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}"
+                    )
+                }
+                failure {
+                    mail(
+                        to: "${EMAIL_RECIPIENT}",
+                        subject: "Jenkins Pipeline Failure: Security Scan - ${currentBuild.fullDisplayName}",
+                        body: "The Security Scan stage has failed.\n\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}\nCheck the logs for more details."
+                    )
+                }
             }
         }
 
@@ -55,41 +88,24 @@ pipeline {
     }
 
     post {
+        success {
+            mail(
+                to: "${EMAIL_RECIPIENT}",
+                subject: "Jenkins Pipeline Success: ${currentBuild.fullDisplayName}",
+                body: "The Jenkins pipeline has completed successfully.\n\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}"
+            )
+        }
+        failure {
+            mail(
+                to: "${EMAIL_RECIPIENT}",
+                subject: "Jenkins Pipeline Failure: ${currentBuild.fullDisplayName}",
+                body: "The Jenkins pipeline has failed.\n\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}\nCheck the logs for more details."
+            )
+        }
         always {
             script {
-                // Archive the build log
-                archiveArtifacts artifacts: 'build.log', allowEmptyArchive: true
-            }
-        }
-
-        success {
-            script {
-                try {
-                    emailext(
-                        to: "${EMAIL_RECIPIENT}",
-                        subject: "Jenkins Pipeline Success: ${currentBuild.fullDisplayName}",
-                        body: "The Jenkins pipeline has completed successfully.\n\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}",
-                        attachmentsPattern: "build.log"
-                    )
-                } catch (Exception e) {
-                    echo "Failed to send success email: ${e.getMessage()}"
-                    echo "Full error: ${e}"
-                }
-            }
-        }
-
-        failure {
-            script {
-                try {
-                    emailext(
-                        to: "${EMAIL_RECIPIENT}",
-                        subject: "Jenkins Pipeline Failure: ${currentBuild.fullDisplayName}",
-                        body: "The Jenkins pipeline has failed.\n\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}\nCheck the attached logs for more details.",
-                        attachmentsPattern: "build.log"
-                    )
-                } catch (Exception e) {
-                    echo "Failed to send failure email: ${e.getMessage()}"
-                    echo "Full error: ${e}"
+                if (currentBuild.result == 'FAILURE' || currentBuild.result == 'SUCCESS') {
+                    echo "Sending notification email to ${EMAIL_RECIPIENT}."
                 }
             }
         }
