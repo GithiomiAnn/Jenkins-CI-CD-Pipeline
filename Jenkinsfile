@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        // Environment variables
         MAVEN_HOME = 'C:\\Program Files\\apache-maven-3.9.9'
         JAVA_HOME = 'C:\\Program Files\\jdk-22.0.2'
         PATH = "${JAVA_HOME}\\bin;${MAVEN_HOME}\\bin;${env.PATH}"
@@ -64,21 +63,35 @@ pipeline {
         }
 
         success {
-            emailext(
-                to: "${EMAIL_RECIPIENT}",
-                subject: "Jenkins Pipeline Success: ${currentBuild.fullDisplayName}",
-                body: "The Jenkins pipeline has completed successfully.\n\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}",
-                attachmentsPattern: "build.log"  // Attach the build log
-            )
+            script {
+                try {
+                    emailext(
+                        to: "${EMAIL_RECIPIENT}",
+                        subject: "Jenkins Pipeline Success: ${currentBuild.fullDisplayName}",
+                        body: "The Jenkins pipeline has completed successfully.\n\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}",
+                        attachmentsPattern: "build.log"
+                    )
+                } catch (Exception e) {
+                    echo "Failed to send success email: ${e.getMessage()}"
+                    echo "Full error: ${e}"
+                }
+            }
         }
 
         failure {
-            emailext(
-                to: "${EMAIL_RECIPIENT}",
-                subject: "Jenkins Pipeline Failure: ${currentBuild.fullDisplayName}",
-                body: "The Jenkins pipeline has failed.\n\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}\nCheck the attached logs for more details.",
-                attachmentsPattern: "build.log"  // Attach the build log
-            )
+            script {
+                try {
+                    emailext(
+                        to: "${EMAIL_RECIPIENT}",
+                        subject: "Jenkins Pipeline Failure: ${currentBuild.fullDisplayName}",
+                        body: "The Jenkins pipeline has failed.\n\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}\nCheck the attached logs for more details.",
+                        attachmentsPattern: "build.log"
+                    )
+                } catch (Exception e) {
+                    echo "Failed to send failure email: ${e.getMessage()}"
+                    echo "Full error: ${e}"
+                }
+            }
         }
     }
 }
