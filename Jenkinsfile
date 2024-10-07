@@ -13,30 +13,14 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building the code using Maven...'
-                bat 'mvn clean package'
+                bat 'mvn clean package > build.log'  // Redirect output to build.log
             }
         }
 
         stage('Unit and Integration Tests') {
             steps {
                 echo 'Running unit and integration tests using JUnit and Selenium...'
-                bat 'mvn test'
-            }
-            post {
-                success {
-                    mail(
-                        to: "${EMAIL_RECIPIENT}",
-                        subject: "Jenkins Pipeline Success: Unit and Integration Tests - ${currentBuild.fullDisplayName}",
-                        body: "The Unit and Integration Tests stage has completed successfully.\n\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}"
-                    )
-                }
-                failure {
-                    mail(
-                        to: "${EMAIL_RECIPIENT}",
-                        subject: "Jenkins Pipeline Failure: Unit and Integration Tests - ${currentBuild.fullDisplayName}",
-                        body: "The Unit and Integration Tests stage has failed.\n\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}\nCheck the logs for more details."
-                    )
-                }
+                bat 'mvn test >> build.log'  // Append output to build.log
             }
         }
 
@@ -49,22 +33,6 @@ pipeline {
         stage('Security Scan') {
             steps {
                 echo 'Performing security scan using OWASP Dependency-Check...'
-            }
-            post {
-                success {
-                    mail(
-                        to: "${EMAIL_RECIPIENT}",
-                        subject: "Jenkins Pipeline Success: Security Scan - ${currentBuild.fullDisplayName}",
-                        body: "The Security Scan stage has completed successfully.\n\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}"
-                    )
-                }
-                failure {
-                    mail(
-                        to: "${EMAIL_RECIPIENT}",
-                        subject: "Jenkins Pipeline Failure: Security Scan - ${currentBuild.fullDisplayName}",
-                        body: "The Security Scan stage has failed.\n\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}\nCheck the logs for more details."
-                    )
-                }
             }
         }
 
@@ -88,26 +56,29 @@ pipeline {
     }
 
     post {
+        always {
+            script {
+                // Archive the build log
+                archiveArtifacts artifacts: 'build.log', allowEmptyArchive: true
+            }
+        }
+
         success {
             mail(
                 to: "${EMAIL_RECIPIENT}",
                 subject: "Jenkins Pipeline Success: ${currentBuild.fullDisplayName}",
-                body: "The Jenkins pipeline has completed successfully.\n\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}"
+                body: "The Jenkins pipeline has completed successfully.\n\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}",
+                attachmentsPattern: "build.log"  // Attach the build log
             )
         }
+
         failure {
             mail(
                 to: "${EMAIL_RECIPIENT}",
                 subject: "Jenkins Pipeline Failure: ${currentBuild.fullDisplayName}",
-                body: "The Jenkins pipeline has failed.\n\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}\nCheck the logs for more details."
+                body: "The Jenkins pipeline has failed.\n\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}\nCheck the attached logs for more details.",
+                attachmentsPattern: "build.log"  // Attach the build log
             )
-        }
-        always {
-            script {
-                if (currentBuild.result == 'FAILURE' || currentBuild.result == 'SUCCESS') {
-                    echo "Sending notification email to ${EMAIL_RECIPIENT}."
-                }
-            }
         }
     }
 }
